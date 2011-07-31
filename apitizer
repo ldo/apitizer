@@ -31,7 +31,7 @@ status = subprocess.Popen \
     args =
             ["javap", "-classpath", jarname]
         +
-            list
+            sorted
               (
                 ".".join(name[:- len(class_suffix)].split("/"))
                 for name in zipfile.ZipFile(jarname).namelist()

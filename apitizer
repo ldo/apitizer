@@ -1,0 +1,45 @@
+#!/usr/bin/python
+#+
+# This script uses javap to decompile all classes in a .jar file.
+#
+# Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+#-
+
+import sys
+import subprocess
+import zipfile
+import getopt
+
+class_suffix = ".class"
+
+#+
+# Mainline
+#-
+
+opts, args = getopt.getopt \
+  (
+    sys.argv[1:],
+    "",
+    []
+  )
+if len(args) != 1 :
+    raise getopt.GetoptError("need exactly one arg, the pathname for the .jar file")
+#end if
+jarname = args[0]
+status = subprocess.Popen \
+  (
+    args =
+            ["javap", "-classpath", jarname]
+        +
+            list
+              (
+                ".".join(name[:- len(class_suffix)].split("/"))
+                for name in zipfile.ZipFile(jarname).namelist()
+                if name.endswith(class_suffix)
+              ),
+    close_fds = True,
+    shell = False,
+  ).wait()
+if status != 0 :
+    raise getopt.GetoptError("javap returned status %d" % status)
+#end if

@@ -1,6 +1,21 @@
 #!/usr/bin/python
+# -*- coding: utf-8
 #+
 # This script uses javap to decompile all classes in a .jar file.
+# This is particularly useful for checking features Android API versions
+# against the claims at <http://developer.android.com/reference/packages.html>;
+# the latter sometimes says a feature is only available from some version
+# onwards, when in fact it’s available in earlier versions.
+#
+# To examine the features of a particular Android API version, use the script
+# like this:
+#
+#     apitizer $ANDROID_SDK_ROOT/platforms/$TARGET/android.jar
+#
+# where $ANDROID_SDK_ROOT should be replaced with the path to the directory
+# where you installed the SDK, and $TARGET should be replaced with the name
+# of the subdirectory containing the definitions for the specified API version,
+# e.g. “android-7” for API level 7 (Android 2.2).
 #
 # Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 #-

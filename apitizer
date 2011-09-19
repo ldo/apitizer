@@ -28,6 +28,7 @@
 import sys
 import os
 import subprocess
+import termios
 import zipfile
 import getopt
 
@@ -53,6 +54,7 @@ else :
 #end if
 children = []
 if pagercmd != None :
+    savettyattr = termios.tcgetattr(sys.stdout)
     pager = subprocess.Popen \
       (
         args = pagercmd,
@@ -63,6 +65,7 @@ if pagercmd != None :
     pageout = pager.stdin
     children.append(pager)
 else :
+    savettyattr = None
     pager = None
     pageout = None
 #end if
@@ -116,5 +119,10 @@ try :
 finally :
     if pager != None :
         pager.kill() # ensure it properly restores terminal settings
+    #end if
+    # Above doesn't seem to be enough, so I do my own restoration
+    if savettyattr != None :
+        termios.tcsetattr(sys.stdout, termios.TCSAFLUSH, savettyattr)
+        sys.stderr.write("term attrs restored\n")
     #end if
 #end try

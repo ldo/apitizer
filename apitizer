@@ -15,12 +15,18 @@
 # where $ANDROID_SDK_ROOT should be replaced with the path to the directory
 # where you installed the SDK, and $TARGET should be replaced with the name
 # of the subdirectory containing the definitions for the specified API version,
-# e.g. “android-7” for API level 7 (Android 2.2).
+# e.g. “android-7” for API level 7 (Android 2.2). To examine the differences
+# between two different API levels, pass both .jar files, e.g.
+#
+#     apitizer $ANDROID_SDK_ROOT/platforms/{$TARGET,$TARGET2}/android.jar
+#
+# (using Bash brace expansion to substitute $TARGET1 and $TARGET2 in turn).
 #
 # Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 #-
 
 import sys
+import os
 import subprocess
 import zipfile
 import getopt
@@ -37,24 +43,78 @@ opts, args = getopt.getopt \
     "",
     []
   )
-if len(args) != 1 :
-    raise getopt.GetoptError("need exactly one arg, the pathname for the .jar file")
+if len(args) < 1 or len(args) > 2 :
+    raise getopt.GetoptError("need exactly one or two args, the pathnames for the .jar files")
 #end if
-jarname = args[0]
-status = subprocess.Popen \
-  (
-    args =
-            ["javap", "-classpath", jarname]
-        +
-            sorted
+if sys.stdout.isatty() :
+    pagercmd = os.environ.get("PAGER")
+else :
+    pagercmd = None
+#end if
+children = []
+if pagercmd != None :
+    pager = subprocess.Popen \
+      (
+        args = pagercmd,
+        shell = True,
+        stdin = subprocess.PIPE,
+        close_fds = True,
+      )
+    pageout = pager.stdin
+    children.append(pager)
+else :
+    pager = None
+    pageout = None
+#end if
+try :
+    dumpers = []
+    for jarname in args :
+        dumpers.append \
+          (
+            subprocess.Popen
               (
-                ".".join(name[:- len(class_suffix)].split("/"))
-                for name in zipfile.ZipFile(jarname).namelist()
-                if name.endswith(class_suffix)
-              ),
-    close_fds = True,
-    shell = False,
-  ).wait()
-if status != 0 :
-    raise getopt.GetoptError("javap returned status %d" % status)
-#end if
+                args =
+                        ["javap", "-classpath", jarname]
+                    +
+                        sorted
+                          (
+                            ".".join(name[:- len(class_suffix)].split("/"))
+                            for name in zipfile.ZipFile(jarname).namelist()
+                            if name.endswith(class_suffix)
+                          ),
+                close_fds = True,
+                shell = False,
+                stdout = (pageout, subprocess.PIPE)[len(args) > 1],
+              )
+          )
+    #end if
+    children.extend(dumpers)
+    if len(args) > 1 :
+        differ = subprocess.Popen \
+          (
+            args =
+                [
+                    "diff", "-F", "class", "-F", "interface", "-u",
+                    "/dev/fd/%d" % dumpers[0].stdout.fileno(),
+                    "/dev/fd/%d" % dumpers[1].stdout.fileno(),
+                ],
+            close_fds = False,
+            shell = False,
+            stdout = pageout,
+          )
+        children.append(differ)
+    #end if
+    for child in children :
+        status = child.wait()
+        if child == pager :
+            pager = None
+        #end if
+        if status != 0 :
+            raise getopt.GetoptError("child returned status %d" % status)
+        #end if
+    #end for
+finally :
+    if pager != None :
+        pager.kill() # ensure it properly restores terminal settings
+    #end if
+#end try

@@ -123,6 +123,5 @@ finally :
     # Above doesn't seem to be enough, so I do my own restoration
     if savettyattr != None :
         termios.tcsetattr(sys.stdout, termios.TCSAFLUSH, savettyattr)
-        sys.stderr.write("term attrs restored\n")
     #end if
 #end try

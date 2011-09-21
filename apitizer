@@ -107,6 +107,9 @@ try :
           )
         children.append(differ)
     #end if
+    if pager != None :
+        pageout.close() # so pager sees EOF when child feeding into it terminates
+    #end if
     for child in children :
         status = child.wait()
         if child == pager :

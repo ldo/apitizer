@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8
 #+
 # This script uses javap to decompile all classes in a .jar file.
@@ -27,6 +27,7 @@
 
 import sys
 import os
+import fcntl
 import subprocess
 import termios
 import zipfile
@@ -60,7 +61,6 @@ if pagercmd != None :
         args = pagercmd,
         shell = True,
         stdin = subprocess.PIPE,
-        close_fds = True,
       )
     pageout = pager.stdin
     children.append(pager)
@@ -85,7 +85,6 @@ try :
                             for name in zipfile.ZipFile(jarname).namelist()
                             if name.endswith(class_suffix)
                           ),
-                close_fds = True,
                 shell = False,
                 stdout = (pageout, subprocess.PIPE)[len(args) > 1],
               )
@@ -93,6 +92,10 @@ try :
     #end if
     children.extend(dumpers)
     if len(args) > 1 :
+        pass_fds = (dumpers[0].stdout.fileno(), dumpers[1].stdout.fileno())
+        for fd in pass_fds :
+            fcntl.fcntl(fd, fcntl.F_SETFD, fcntl.fcntl(fd, fcntl.F_GETFD) & ~fcntl.FD_CLOEXEC)
+        #end for
         differ = subprocess.Popen \
           (
             args =
@@ -101,7 +104,7 @@ try :
                     "/dev/fd/%d" % dumpers[0].stdout.fileno(),
                     "/dev/fd/%d" % dumpers[1].stdout.fileno(),
                 ],
-            close_fds = False,
+            pass_fds = pass_fds,
             shell = False,
             stdout = pageout,
           )

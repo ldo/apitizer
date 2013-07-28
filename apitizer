@@ -119,7 +119,7 @@ try :
             pager = None
         #end if
         if status != 0 :
-            raise getopt.GetoptError("child returned status %d" % status)
+            raise RuntimeError("child returned status %d" % status)
         #end if
     #end for
 finally :

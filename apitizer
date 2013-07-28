@@ -15,7 +15,7 @@
 # where $ANDROID_SDK_ROOT should be replaced with the path to the directory
 # where you installed the SDK, and $TARGET should be replaced with the name
 # of the subdirectory containing the definitions for the specified API version,
-# e.g. “android-7” for API level 7 (Android 2.2). To examine the differences
+# e.g. “android-8” for API level 8 (Android 2.2). To examine the differences
 # between two different API levels, pass both .jar files, e.g.
 #
 #     apitizer $ANDROID_SDK_ROOT/platforms/{$TARGET,$TARGET2}/android.jar

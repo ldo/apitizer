@@ -2,7 +2,7 @@
 # -*- coding: utf-8
 #+
 # This script uses javap to decompile all classes in a .jar file.
-# This is particularly useful for checking features Android API versions
+# This is particularly useful for checking features of Android API versions
 # against the claims at <http://developer.android.com/reference/packages.html>;
 # the latter sometimes says a feature is only available from some version
 # onwards, when in fact it’s available in earlier versions.

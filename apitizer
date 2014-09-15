@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-# -*- coding: utf-8
 #+
 # This script uses javap to decompile all classes in a .jar file.
 # This is particularly useful for checking features of Android API versions

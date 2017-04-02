@@ -89,7 +89,7 @@ try :
                 stdout = (pageout, subprocess.PIPE)[len(args) > 1],
               )
           )
-    #end if
+    #end for
     children.extend(dumpers)
     if len(args) > 1 :
         pass_fds = (dumpers[0].stdout.fileno(), dumpers[1].stdout.fileno())
